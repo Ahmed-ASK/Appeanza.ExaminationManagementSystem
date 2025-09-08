@@ -1,0 +1,6 @@
+@Appeanza.ExaminationManagementSystem.APIs_HostAddress = http://localhost:5298
+
+GET {{Appeanza.ExaminationManagementSystem.APIs_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
