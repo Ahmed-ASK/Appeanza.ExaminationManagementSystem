@@ -5,7 +5,6 @@ using Appeanza.ExaminationManagementSystem.Domain.Emtities.Identity;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -17,7 +16,7 @@ namespace Appeanza.ExaminationManagementSystem.Application.Services.Auth
 {
     public class AuthService 
         (
-            IMapper mapper,
+            //IMapper mapper, // Maybe Will Be Use In The Future
             IOptions<JwtSettings> _jwtSettings,
             UserManager<ApplicationUser> _userManager,
             SignInManager<ApplicationUser> _signInManager
@@ -27,12 +26,39 @@ namespace Appeanza.ExaminationManagementSystem.Application.Services.Auth
 
         public IHttpContextAccessor? HttpContextAccessor { get; set; }
 
+        public async Task<UserDto> GetCurrentUserAsync(ClaimsPrincipal claimsPrincipal)
+        {
+            var email = claimsPrincipal.FindFirstValue(ClaimTypes.Email);
+
+            var user = await _userManager.FindByEmailAsync(email!);
+            var userRole = await _userManager.GetRolesAsync(user!);
+            if (user is null) throw new BadRequestException("user was not found");
+
+            var userDto = new UserDto()
+            {
+                Id = user.Id,
+                DisplayName = user.DisplayName,
+                Email = user.Email!,
+                Role = userRole.FirstOrDefault()!,
+                Token = await GenerateTokenAsync(user),
+            };
+
+            return userDto;
+        }
+        public async Task<bool> EmailExists(string email)
+        {
+            return await _userManager.FindByEmailAsync(email) is not null;
+        }
+        public async Task<bool> UserNameExists(string username)
+        {
+            return await _userManager.FindByNameAsync(username) is not null;
+        }
         public async Task<UserDto> LoginAsync(LoginDto model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
-            var userRoles = _userManager.GetRolesAsync(user);
 
             if(user is null) throw new UnAuthorizedException("Invalid Login.");
+            var userRoles = _userManager.GetRolesAsync(user);
             
             var result = await _signInManager.CheckPasswordSignInAsync(user , model.Password , lockoutOnFailure: true);
             
@@ -68,43 +94,45 @@ namespace Appeanza.ExaminationManagementSystem.Application.Services.Auth
 
             return response;
         }
-
-  
-        public Task<UserDto> RegisterAsync(RegisterDto model)
+        public async Task<UserDto> RegisterAsync(RegisterDto model)
         {
-            throw new NotImplementedException();
-        }
-        public async Task<bool> EmailExists(string email)
-        {
-            return await _userManager.FindByEmailAsync(email) is not null;
-        }
+          
+            if (EmailExists(model.Email).Result) throw new BadRequestException("Email Already Exists");
 
-        public async Task<UserDto> GetCurrentUserAsync(ClaimsPrincipal claimsPrincipal)
-        {
-            var email = claimsPrincipal.FindFirstValue(ClaimTypes.Email);
+            if (UserNameExists(model.UserName).Result) throw new BadRequestException("Username Already Taken");
 
-            var user = await _userManager.FindByEmailAsync(email!);
-            var userRole = await _userManager.GetRolesAsync(user!);
-            if (user is null) throw new UnAuthorizedException("");
-
-            var userDto = new UserDto()
+            var user = new ApplicationUser()
             {
-                Id = user.Id,
-                DisplayName = user.DisplayName,
-                Email = user.Email!,
-                Role = userRole.FirstOrDefault()!,
-                Token = await GenerateTokenAsync(user),
+                DisplayName = model.DisplayName,
+                Email = model.Email,
+                UserName = model.DisplayName,
+                PhoneNumber = model.PhoneNumber,
+                IsDeleted = false
             };
 
-            return userDto;
-        }
+            var result = await _userManager.CreateAsync(user , model.Password);
 
+            if (!result.Succeeded) throw new ValidationException("Something went wrong during registeration")
+            {
+                Errors = result.Errors.Select(E => E.Description)
+            };
+
+            var response = new UserDto()
+            {
+                Id = user.Id,
+                DisplayName = model.DisplayName,
+                Email = model.Email,
+                Role = model.RoleName,
+                Token = await GenerateTokenAsync(user)
+            };
+            return response;
+        }
         private async Task<string> GenerateTokenAsync(ApplicationUser user)
         {
             var userClaims = await _userManager.GetClaimsAsync(user);
-            
+
             var rolesAsClaims = new List<Claim>();
-            
+
             var roles = await _userManager.GetRolesAsync(user);
             foreach (var role in roles)
                 rolesAsClaims.Add(new Claim(ClaimTypes.Role, role.ToString()));
@@ -114,7 +142,7 @@ namespace Appeanza.ExaminationManagementSystem.Application.Services.Auth
             {
                 var identityRole = await _userManager.FindByNameAsync(role);
                 if (identityRole is not null)
-                { 
+                {
                     var ClaimsForRole = new List<Claim>();
                     var claimsForRole = await _userManager.GetClaimsAsync(identityRole);
                     roleClaims.AddRange(claimsForRole);
@@ -145,18 +173,6 @@ namespace Appeanza.ExaminationManagementSystem.Application.Services.Auth
 
             return new JwtSecurityTokenHandler().WriteToken(tokenObj);
         }
-        private void SetRefreshTokenInCookies(string refreshToken, DateTime expires)
-        {
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Expires = expires.ToLocalTime(),
-                Secure = true,
-                IsEssential = true,
-                SameSite = SameSiteMode.None
-            };
-            HttpContextAccessor?.HttpContext?.Response.Cookies.Append("refreshToken",refreshToken, cookieOptions);
-        }
         private RefreshToken GetRefreshToken()
         {
             var randomNumber = new byte[32];
@@ -170,6 +186,18 @@ namespace Appeanza.ExaminationManagementSystem.Application.Services.Auth
                 Token = Convert.ToBase64String(randomNumber),
                 ExpiresOn = DateTime.UtcNow.AddDays(10),
             };
+        }
+        private void SetRefreshTokenInCookies(string refreshToken, DateTime expires)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = expires.ToLocalTime(),
+                Secure = true,
+                IsEssential = true,
+                SameSite = SameSiteMode.None
+            };
+            HttpContextAccessor?.HttpContext?.Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
         }
 
     }

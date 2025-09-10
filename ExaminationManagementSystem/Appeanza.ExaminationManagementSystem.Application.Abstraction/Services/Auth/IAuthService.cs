@@ -14,6 +14,7 @@ namespace Appeanza.ExaminationManagementSystem.Application.Abstraction.Services.
         Task<UserDto> LoginAsync(LoginDto model);
         Task<UserDto> RegisterAsync(RegisterDto model);
         Task<bool> EmailExists(string email);
+        Task<bool> UserNameExists(string username);
         Task<UserDto> GetCurrentUserAsync(ClaimsPrincipal claimsPrincipal);
 
 
