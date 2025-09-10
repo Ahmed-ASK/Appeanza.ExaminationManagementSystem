@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Appeanza.ExaminationManagementSystem.Application.Abstraction\Appeanza.ExaminationManagementSystem.Application.Abstraction.csproj" />
+    <ProjectReference Include="..\Appeanza.ExaminationManagementSystem.Infrastructure\Appeanza.ExaminationManagementSystem.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>

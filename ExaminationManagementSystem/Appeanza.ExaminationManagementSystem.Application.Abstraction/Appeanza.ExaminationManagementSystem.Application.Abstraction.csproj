@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Appeanza.ExaminationManagementSystem.Domain\Appeanza.ExaminationManagementSystem.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

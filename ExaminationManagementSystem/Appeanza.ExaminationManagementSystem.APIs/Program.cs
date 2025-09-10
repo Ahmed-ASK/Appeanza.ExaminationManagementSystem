@@ -1,4 +1,9 @@
 
+using Appeanza.ExaminationManagementSystem.APIs.Extentions;
+using Appeanza.ExaminationManagementSystem.Infrastructure.Persistence;
+using Appeanza.ExaminationManagementSystem.Infrastructure.Persistence.Identity;
+using Microsoft.EntityFrameworkCore;
+
 namespace Appeanza.ExaminationManagementSystem.APIs
 {
     public class Program
@@ -13,7 +18,11 @@ namespace Appeanza.ExaminationManagementSystem.APIs
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
+            builder.Services.AddPersistenceServices(builder.Configuration);
+
+
             var app = builder.Build();
+            app.InitializeDbAsync();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
