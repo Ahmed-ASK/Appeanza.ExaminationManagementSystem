@@ -10,9 +10,10 @@ namespace Appeanza.ExaminationManagementSystem.Infrastructure.Persistence._Ident
     {
         public override async Task SeedAsync()
         {
+            IEnumerable<IdentityRole> roles = new List<IdentityRole>();
             if (!_dbContext.Roles.Any())
             {
-                var roles = new List<IdentityRole>()
+                roles = new List<IdentityRole>()
                 {
                     new IdentityRole()
                     {
@@ -28,6 +29,43 @@ namespace Appeanza.ExaminationManagementSystem.Infrastructure.Persistence._Ident
                 await _dbContext.AddRangeAsync(roles);
                 await _dbContext.SaveChangesAsync();
             }
+            if (!_dbContext.RoleClaims.Any())
+            {
+                var teacherRole = _dbContext.Roles.FirstOrDefault(R => R.NormalizedName == "STUDENT");
+                var studentRole = _dbContext.Roles.FirstOrDefault(R => R.NormalizedName == "TEACHER");
+
+                var roleClaims = new List<IdentityRoleClaim<string>>()
+                {
+                    new IdentityRoleClaim<string>
+                    {
+                        RoleId = teacherRole.Id,
+                        ClaimType = "CREATE_EXAM",
+                        ClaimValue = "true"
+                    },
+                    new IdentityRoleClaim<string>
+                    {
+                        RoleId = teacherRole.Id,
+                        ClaimType = "CREATE_GROUP",
+                        ClaimValue = "true"
+                    },
+                    new IdentityRoleClaim<string>
+                    {
+                        RoleId = studentRole.Id,
+                        ClaimType = "JOIN_GROUP",
+                        ClaimValue = "true"
+                    },
+                    new IdentityRoleClaim<string>
+                    {
+                        RoleId = studentRole.Id,
+                        ClaimType = "EXAMINATE",
+                        ClaimValue = "true"
+                    }
+                };
+
+                await _dbContext.RoleClaims.AddRangeAsync(roleClaims);
+                await _dbContext.SaveChangesAsync();
+            }
+
         }
     }
 }

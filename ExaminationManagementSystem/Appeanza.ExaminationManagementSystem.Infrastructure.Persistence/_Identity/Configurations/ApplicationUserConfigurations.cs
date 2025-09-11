@@ -17,6 +17,10 @@ namespace Appeanza.ExaminationManagementSystem.Infrastructure.Persistence.Identi
                 .HasColumnType("VARCHAR")
                 .HasMaxLength(100)
                 .IsRequired();
+
+            builder
+                .HasIndex(U => U.UserName)
+                .IsUnique();
         }
     }
 }

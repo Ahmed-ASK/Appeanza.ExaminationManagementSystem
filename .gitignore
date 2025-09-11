@@ -361,3 +361,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/ExaminationManagementSystem/Testing/Testing.csproj
+/ExaminationManagementSystem/Testing/Program.cs
+/ExaminationManagementSystem/Appenza.ExaminationSystem.Test/Appenza.ExaminationSystem.Test.csproj
+/ExaminationManagementSystem/Appenza.ExaminationSystem.Test/IAuthServiceTests.cs
+/ExaminationManagementSystem/Appenza.ExaminationSystem.Test/UnitTest1.cs
