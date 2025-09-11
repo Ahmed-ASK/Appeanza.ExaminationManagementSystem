@@ -11,7 +11,9 @@ namespace Appeanza.ExaminationManagementSystem.Application
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services) 
         {
-            services.AddScoped(typeof(IServiceManager), typeof(ServiceManager));
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<Func<IAuthService>>(provider => () => provider.GetRequiredService<IAuthService>());
+            services.AddScoped<IServiceManager, ServiceManager>();
 
             return services;
         }
