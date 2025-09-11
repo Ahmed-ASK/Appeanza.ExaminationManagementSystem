@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Appeanza.ExaminationManagementSystem.Infrastructure.Persistence\Appeanza.ExaminationManagementSystem.Infrastructure.Persistence.csproj" />
+  </ItemGroup>
+
 </Project>
