@@ -13,14 +13,20 @@ namespace Appeanza.ExaminationManagementSystem.Infrastructure.Persistence
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddPersistenceServices(this IServiceCollection services, IConfiguration configurations)
+        public static IServiceCollection AddPersistenceServices
+            (
+            this IServiceCollection services, 
+            IConfiguration configurations,
+            string identityConnectionStringSection,
+            string examinationSystemConnectionStringSectionName
+            )
         {
 
             services.AddDbContext<ExaminationIdentityDbContext>(options => 
             {
                 options
                 .UseLazyLoadingProxies()
-                .UseSqlServer(configurations.GetConnectionString("IdentityContext"));
+                .UseSqlServer(configurations.GetConnectionString(identityConnectionStringSection));
             });
             services.AddScoped(typeof(IExaminationIdentityDbInitializer), typeof(ExaminationIdentityDbInitializer));
 
@@ -28,7 +34,7 @@ namespace Appeanza.ExaminationManagementSystem.Infrastructure.Persistence
             {
                 options
                 .UseLazyLoadingProxies()
-                .UseSqlServer(configurations.GetConnectionString("ExaminationDbContext"));
+                .UseSqlServer(configurations.GetConnectionString(examinationSystemConnectionStringSectionName));
             });
             services.AddScoped(typeof(IExaminationDbInitializer), typeof(ExaminationDbInitializer));
 

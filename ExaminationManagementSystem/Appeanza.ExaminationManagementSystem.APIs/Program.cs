@@ -18,7 +18,12 @@ namespace Appeanza.ExaminationManagementSystem.APIs
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
-            builder.Services.AddPersistenceServices(builder.Configuration);
+            builder.Services.AddPersistenceServices
+                (
+                builder.Configuration,
+                identityConnectionStringSection:"IdentityContext" ,
+                examinationSystemConnectionStringSectionName :"ExaminationDbContext"
+                );
 
 
             var app = builder.Build();

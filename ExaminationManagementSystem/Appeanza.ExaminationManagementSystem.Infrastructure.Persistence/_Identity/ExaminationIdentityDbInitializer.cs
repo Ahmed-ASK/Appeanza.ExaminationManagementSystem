@@ -27,11 +27,12 @@ namespace Appeanza.ExaminationManagementSystem.Infrastructure.Persistence._Ident
                     }
                 };
                 await _dbContext.AddRangeAsync(roles);
+                await _dbContext.SaveChangesAsync();
             }
             if (!_dbContext.RoleClaims.Any())
             {
-                var teacherRole = roles.First(r => r.NormalizedName == "TEACHER");
-                var studentRole = roles.First(r => r.NormalizedName == "STUDENT");
+                var teacherRole = _dbContext.Roles.FirstOrDefault(R => R.NormalizedName == "STUDENT");
+                var studentRole = _dbContext.Roles.FirstOrDefault(R => R.NormalizedName == "TEACHER");
 
                 var roleClaims = new List<IdentityRoleClaim<string>>()
                 {
@@ -62,8 +63,8 @@ namespace Appeanza.ExaminationManagementSystem.Infrastructure.Persistence._Ident
                 };
 
                 await _dbContext.RoleClaims.AddRangeAsync(roleClaims);
+                await _dbContext.SaveChangesAsync();
             }
-            await _dbContext.SaveChangesAsync();
 
         }
     }
