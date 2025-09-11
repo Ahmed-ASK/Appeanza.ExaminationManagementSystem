@@ -105,7 +105,7 @@ namespace Appeanza.ExaminationManagementSystem.Application.Services.Auth
             {
                 DisplayName = model.DisplayName,
                 Email = model.Email,
-                UserName = model.DisplayName,
+                UserName = model.UserName,
                 PhoneNumber = model.PhoneNumber,
                 IsDeleted = false
             };
